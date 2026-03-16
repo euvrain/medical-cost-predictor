@@ -101,8 +101,8 @@ plt.figure(figsize=(8, 6))
 #color="pink", alpha=0.5, s=15)
 #plt.plot([0, 800], [0, 800], 'r--',color="#B43757")
 
-plt.scatter(y_val_log_1, y_pred_lr,  color='gray')
-plt.plot([6,12],[6,12], color='red', linewidth=2)
+plt.scatter(y_val_log_1, y_pred_lr,  color='pink', edgecolor='hotpink')
+plt.plot([6.5,11.5],[6.5,11.5], color='#B43757',linestyle='--', linewidth=2)
 plt.show()
 
 """The scatter plot of predicted vs actual log-transformed charges shows that the linear 
@@ -123,8 +123,8 @@ score_2 = cross_val_score(lr, X_train_2_sc, y_train_log_2, cv=5, scoring='neg_me
 RMSE_2 =np.sqrt(-score_2.mean())
 print(f"Cross-validated RMSE without 'children': {RMSE_2:.2f}")
 plt.figure(figsize=(8, 6))
-plt.scatter(y_val_log_2, y_pred_lr_2,  color='gray')
-plt.plot([6,12],[6,12], color='red', linewidth=2)
+plt.scatter(y_val_log_2, y_pred_lr_2,  color='pink', edgecolor='hotpink')
+plt.plot([6.5,11.5],[6.5,11.5], color='#B43757', linewidth=2,linestyle='--')
 plt.show()
 
 """Removing the 'children' feature did not significantly improve the model's performance, as the RMSE 
@@ -157,10 +157,10 @@ for k in k_test:
     rmse = np.sqrt(-score.mean())
     cv_scores_knn_r.append(rmse)
 
-plt.figure(figsize=(10, 6))
+plt.figure(figsize=(18, 6))
 plt.plot(k_test, cv_scores_knn_r, marker='o', color='pink')
 best_k = k_test[np.argmin(cv_scores_knn_r)]
-plt.axvline(best_k, color='#B43757', linestyle='--', label=f'Best K = {best_k}')
+plt.axvline(best_k, color='#B43757', linestyle='--',linewidth=2, label=f'Best K = {best_k}')
 plt.xlabel('Number of Neighbors (k)')
 plt.ylabel('Cross-Validated RMSE')
 plt.title('KNN Regression Hyperparameter Tuning')
@@ -177,9 +177,16 @@ knn_r = KNeighborsRegressor(n_neighbors=best_k)
 knn_r.fit(X_train_knn, y_train_knn)
 y_pred_knn_r = knn_r.predict(X_val_knn)
 plt.figure(figsize=(8, 6))
-plt.scatter(y_val_knn, y_pred_knn_r, color='gray')
-plt.plot([6,12],[6,12], color='red', linewidth=2)
+plt.scatter(y_val_knn, y_pred_knn_r, color='pink', edgecolor='hotpink')
+plt.plot([6.5,11.5],[6.5,11.5], color='#B43757', linestyle='--' ,linewidth=2)
 plt.xlabel('Actual Log Charges')  
 plt.ylabel('Predicted Log Charges')
 plt.title('KNN Regression: Predicted vs Actual Log Charges')
 plt.show()
+'''The hyperparameter tuning for KNN regression shows that the best value of k is 68,
+ which gives a cross-validated RMSE of 0.78. This indicates that the KNN regression model
+    performs similarly to the linear regression model, which had an RMSE of 0.77. The scatter 
+    plot of predicted vs actual log charges for the KNN regression model shows that the predictions 
+    are reasonably close to the ideal 45-degree line compared to the linear regression model, suggesting that 
+    KNN is able to capture some of the non-linear relationships in the data.'''
+########################################################
