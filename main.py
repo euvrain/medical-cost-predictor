@@ -39,7 +39,6 @@ sns.histplot(y_log, bins=30, kde=True, color='pink', edgecolor='pink')  # histog
 plt.xlabel('Log of Charges')  # Set x label
 plt.ylabel('Frequency')  # Set y label
 plt.title('Log-Transformed Distribution of Charges')
-
 plt.tight_layout()  # Adjust layout to prevent overlap
 plt.show()
 #This shows that the distribution of charges is right-skewed, with a long tail of higher charges. The log transformation helps to normalize the distribution, making it more symmetric and easier to model with linear regression techniques.#We will use the log-transformed charges as our target vairable for modeling, as it is more normally distributed and can help improve the performance of regression models.
@@ -135,6 +134,52 @@ the model's ability to predict charges. Therefore, it may be reasonable to keep 
 the model for interpretability purposes, even though it does not contribute much to predictive performance."""
 
 
+X=X_1
+
 #########################################################
-#5 Implement and evaluate logistic regression model
-###################################################
+#5 Implement and evaluate KNN regression model
+##############################################
+
+#5.1 Train-test split for KNN regression
+X_train_knn,X_val_knn,y_train_knn,y_val_knn=train_test_split(X,y_log,test_size=0.2,random_state=42)
+
+#5.2 normalize features for KNN regression
+scaler.fit_transform(X_train_knn)
+scaler.transform(X_val_knn)
+
+#5.3 Hyperparameter tuning for KNN regression using cross-validation
+k_test = range(1, 101) #test k values from 1 to 20
+cv_scores_knn_r = []
+from sklearn.neighbors import KNeighborsRegressor
+for k in k_test:
+    knn_r = KNeighborsRegressor(n_neighbors=k)
+    score = cross_val_score(knn_r, X_train_knn, y_train_knn, cv=5, scoring='neg_mean_squared_error')
+    rmse = np.sqrt(-score.mean())
+    cv_scores_knn_r.append(rmse)
+
+plt.figure(figsize=(10, 6))
+plt.plot(k_test, cv_scores_knn_r, marker='o', color='pink')
+best_k = k_test[np.argmin(cv_scores_knn_r)]
+plt.axvline(best_k, color='#B43757', linestyle='--', label=f'Best K = {best_k}')
+plt.xlabel('Number of Neighbors (k)')
+plt.ylabel('Cross-Validated RMSE')
+plt.title('KNN Regression Hyperparameter Tuning')
+plt.xticks(k_test)
+plt.grid()
+plt.legend()
+plt.tight_layout()
+plt.show()
+
+#5.4 Train KNN regression model and evaluate performance
+RMSE_knn_r = cv_scores_knn_r[best_k-1]
+print(f"Best K: {best_k}, Cross-validated RMSE: {RMSE_knn_r:.2f}")
+knn_r = KNeighborsRegressor(n_neighbors=best_k)
+knn_r.fit(X_train_knn, y_train_knn)
+y_pred_knn_r = knn_r.predict(X_val_knn)
+plt.figure(figsize=(8, 6))
+plt.scatter(y_val_knn, y_pred_knn_r, color='gray')
+plt.plot([6,12],[6,12], color='red', linewidth=2)
+plt.xlabel('Actual Log Charges')  
+plt.ylabel('Predicted Log Charges')
+plt.title('KNN Regression: Predicted vs Actual Log Charges')
+plt.show()
