@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import sklearn
+from sklearn.model_selection import cross_val_score
 import streamlit
 import joblib
 
@@ -78,6 +78,63 @@ scaler = StandardScaler()
 X_train_1_sc = scaler.fit_transform(X_train_1)
 X_val_1_sc = scaler.transform(X_val_1)
 
+
 #scaling the features and target variable can help improve the performance of regression models by ensuring that all features are on a similar scale, which can help the model converge faster and perform better.
 
 
+#########################################################
+#4 Implement and evaluate linear regression model
+#################################################
+
+from sklearn.linear_model import LinearRegression
+lr=LinearRegression()
+cv_score = cross_val_score(lr, X_train_1_sc, y_train_log_1, cv=5, scoring='neg_mean_squared_error')
+RMSE =np.sqrt(-cv_score.mean())
+print(f"Cross-validated RMSE: {RMSE:.2f}")
+
+
+lr_model=lr.fit(X_train_1_sc, y_train_log_1)
+y_pred_lr = lr_model.predict(X_val_1_sc)
+
+plt.figure(figsize=(8, 6))
+#plt.scatter(y_val_log_1, y_pred_lr, color='pink', edgecolor='pink')
+#plt.scatter(np.expm1(y_val_log_1), np.expm1(y_pred_lr),
+#color="pink", alpha=0.5, s=15)
+#plt.plot([0, 800], [0, 800], 'r--',color="#B43757")
+
+plt.scatter(y_val_log_1, y_pred_lr,  color='gray')
+plt.plot([6,12],[6,12], color='red', linewidth=2)
+plt.show()
+
+"""The scatter plot of predicted vs actual log-transformed charges shows that the linear 
+regression model is able to capture the general trend of the data, but there is some scatter 
+around the ideal 45-degree line, indicating that the model is not perfectly accurate. 
+The RMSE value of 0.77 indicates that on average, the model's predictions are off by about 0.77 in 
+log-transformed charge units, which suggests that there is room for improvement in the model's performance."""
+#What if we remove the 'children' feature since it has low correlation with charges?
+X_train_2,X_val_2,y_train_log_2,y_val_log_2=train_test_split(X_2,y_log,test_size=0.2,random_state=42)
+
+X_train_2_sc = scaler.fit_transform(X_train_2)
+X_val_2_sc = scaler.transform(X_val_2)
+
+lr_model_2=lr.fit(X_train_2_sc, y_train_log_2)
+y_pred_lr_2 = lr_model_2.predict(X_val_2_sc)
+
+score_2 = cross_val_score(lr, X_train_2_sc, y_train_log_2, cv=5, scoring='neg_mean_squared_error')
+RMSE_2 =np.sqrt(-score_2.mean())
+print(f"Cross-validated RMSE without 'children': {RMSE_2:.2f}")
+plt.figure(figsize=(8, 6))
+plt.scatter(y_val_log_2, y_pred_lr_2,  color='gray')
+plt.plot([6,12],[6,12], color='red', linewidth=2)
+plt.show()
+
+"""Removing the 'children' feature did not significantly improve the model's performance, as the RMSE 
+only increased slightly from 0.77 to 0.78. The scatter plot of predicted vs actual log-transformed charges 
+still shows a similar pattern, indicating that the 'children' feature does not have a strong impact on 
+the model's ability to predict charges. Therefore, it may be reasonable to keep the 'children' feature in 
+the model for interpretability purposes, even though it does not contribute much to predictive performance."""
+
+
+#########################################################
+#5 Implement and evaluate logistic regression model
+###################################################
